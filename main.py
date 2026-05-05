@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database.db import init_db
-from routes import patient
+from routes import patient, login
 
 # 👇 IMPORTANT: import models so tables register
 import models.patient
@@ -11,7 +11,7 @@ import models.user
 app = FastAPI(
     title="Ayurvedic",
     version="1.0.0",
-    docs_url="/api/docs",
+    docs_url="/docs",
 )
 
 # CORS
@@ -25,7 +25,7 @@ app.add_middleware(
 
 # Routers
 app.include_router(patient.router)
-
+app.include_router(login.router)
 
 # ✅ THIS is how async DB init should be done
 @app.on_event("startup")

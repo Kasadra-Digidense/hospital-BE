@@ -1,29 +1,41 @@
-# from fastapi import APIRouter, Depends, HTTPException
-# from sqlalchemy.ext.asyncio import AsyncSession
-# from sqlalchemy import select
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
-# from database.db import get_session
-# from models.user import User
-# from schemas.auth import LoginRequest
-
-# router = APIRouter(tags=["Auth"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-# @router.post("/login")
-# async def login(
-#     data: LoginRequest,
-#     db: AsyncSession = Depends(get_session)
-# ):
-#     result = await db.execute(
-#         select(User).where(User.username == data.username)
-#     )
-#     user = result.scalar_one_or_none()
+# Request Schema
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
-#     if not user or user.password != data.password:
-#         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-#     return {
-#         "message": "Login successful",
-#         "user_id": user.id,
-#         "role": user.role
-#     }
+# Dummy Users (Hardcoded)
+DUMMY_USERS = [
+    {
+        "id": 1,
+        "username": "admin",
+        "password": "admin123",
+        "role": "admin"
+    },
+    {
+        "id": 2,
+        "username": "staff",
+        "password": "staff123",
+        "role": "staff"
+    }
+]
+
+
+# Login API
+@router.post("/login")
+async def login(data: LoginRequest):
+    for user in DUMMY_USERS:
+        if user["username"] == data.username and user["password"] == data.password:
+            return {
+                "message": "Login successful",
+                "user_id": user["id"],
+                "role": user["role"]
+            }
+
+    raise HTTPException(status_code=401, detail="Invalid username or password")
