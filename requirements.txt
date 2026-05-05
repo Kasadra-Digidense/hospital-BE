@@ -1,0 +1,38 @@
+# Core Framework & Server
+fastapi[standard]
+uvicorn
+
+# Data Validation
+pydantic~=2.10.6
+
+# Database
+sqlalchemy
+asyncpg                 # Async PostgreSQL driver
+databases               # Optional: async DB toolkit
+psycopg2-binary         # Optional: sync PostgreSQL driver
+
+# Security & Authentication
+passlib==1.7.4          # Pin exact version compatible with bcrypt
+bcrypt==4.0.1           # Pin exact version compatible with passlib
+python-jose[cryptography]
+pyjwt
+email-validator
+
+# Timezone Support
+pytz
+
+# Optional Utilities
+python-multipart        # For file uploads
+python-dotenv           # For .env config loading
+
+# Testing
+pytest
+requests
+pytest-html
+
+# file strorage
+google-cloud-storage
+
+# Install the OpenAI SDK
+openai
+python-dotenv
