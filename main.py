@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database.db import init_db
-from routes import patient, login
+from routes import patient, login, treatment
 
 # 👇 IMPORTANT: import models so tables register
 import models.patient
@@ -31,8 +31,10 @@ app.add_middleware(
 # Routers
 app.include_router(patient.router)
 app.include_router(login.router)
+app.include_router(treatment.router)
 
-# ✅ THIS is how async DB init should be done
+
+# THIS is how async DB init should be done
 @app.on_event("startup")
 async def on_startup():
     await init_db()
@@ -44,13 +46,9 @@ def root():
 
 @app.on_event("startup")
 async def on_startup():
-
     # Create tables
     await init_db()
-
     # Seed master data
     async with AsyncSessionLocal() as session:
-
         await seed_treatments(session)
-
         await seed_rooms(session)
