@@ -1,0 +1,21 @@
+﻿RoomGroup,RoomNumber,Rate
+Standard AC,ROOM - 1 ,1300
+Premium AC,ROOM - 2 ,1850
+General Ward,ROOM - 3 ,200
+General Ward,ROOM - 4,200
+Non AC Small,ROOM - 6 ,600
+Non AC Small,ROOM - 7 ,600
+Non AC Small,ROOM - 8 ,600
+Non AC Big,ROOM - 9 ,700
+Non AC Big,ROOM - 10 ,700
+Non AC Big,ROOM - 11 ,700
+Non AC Big,ROOM - 12 ,700
+Non AC Big,G.1 (AGASTYA) ,900
+Non AC Big with TV,G.2 (AGASTYA) ,900
+Standard AC,F.1 (AGASTYA) ,1300
+Standard AC,F.2 (AGASTYA) ,1300
+Non AC Big,F.3 (AGASTYA) ,900
+Quarters,G.1 (CHARAKA) ,1650
+Quarters,G.2 (CHARAKA) ,2000
+Quarters,F.1 (CHARAKA) ,1650
+Quarters,F.2 (CHARAKA) ,1650

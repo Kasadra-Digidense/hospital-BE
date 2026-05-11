@@ -6,7 +6,12 @@ from routes import patient, login
 
 # 👇 IMPORTANT: import models so tables register
 import models.patient
-import models.user
+import models.treatment
+import models.room
+
+from database.db import AsyncSessionLocal
+from seeders.seed_treatments import seed_treatments
+from seeders.seed_rooms import seed_rooms
 
 app = FastAPI(
     title="Ayurvedic",
@@ -36,3 +41,16 @@ async def on_startup():
 @app.get("/")
 def root():
     return {"message": "Ayurvedic API Running 🌿"}
+
+@app.on_event("startup")
+async def on_startup():
+
+    # Create tables
+    await init_db()
+
+    # Seed master data
+    async with AsyncSessionLocal() as session:
+
+        await seed_treatments(session)
+
+        await seed_rooms(session)

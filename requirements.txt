@@ -36,3 +36,10 @@ google-cloud-storage
 # Install the OpenAI SDK
 openai
 python-dotenv
+
+# CSV / Excel processing
+pandas
+
+# pip install pandas
+# python seed_treatments.py
+# python rooms.csv
