@@ -1,0 +1,22 @@
+# models/invoice_treatment_charge.py
+
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy.orm import relationship
+from database import Base
+
+class InvoiceTreatmentCharge(Base):
+    __tablename__ = "invoice_treatment_charges"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    invoice_id = Column(Integer, ForeignKey("invoices.id"))
+
+    treatment = Column(String)
+
+    qty = Column(Integer)
+
+    rate = Column(Float)
+
+    amount = Column(Float)
+
+    invoice = relationship("Invoice", back_populates="treatment_charges")

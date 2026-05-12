@@ -5,13 +5,20 @@ from database.db import init_db
 from routes import patient, login, treatment, rooms
 
 # IMPORTANT: import models so tables register
-import models.patient
-import models.treatment
-import models.room
+from models.patient import Patient
+from models.room import Room
+from models.treatment import Treatment
+from models.invoice import Invoice
+from models.invoice_room_charge import InvoiceRoomCharge
+from models.invoice_treatment_charge import InvoiceTreatmentCharge
+from models.invoice_additional_charges import InvoiceAdditionalCharge
+from models.invoice_payment import InvoicePayment
 
 from database.db import AsyncSessionLocal
 from seeders.seed_treatments import seed_treatments
 from seeders.seed_rooms import seed_rooms
+
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Ayurvedic",
