@@ -1,69 +1,39 @@
 # app/services/invoice_service.py
 
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
 from models.invoice import Invoice
 from models.invoice_room_charge import InvoiceRoomCharge
 from models.invoice_treatment_charge import InvoiceTreatmentCharge
-from models.invoice_additional_charges          import InvoiceAdditionalCharge
+from models.invoice_additional_charges import InvoiceAdditionalCharge
 from models.invoice_payment import InvoicePayment
+from models.patient import Patient
 
 
-def create_invoice_service(payload, db):
-
+async def create_invoice_service(payload, db: AsyncSession):
     try:
 
-        # -----------------------------
-        # CALCULATE TOTALS
-        # -----------------------------
-
-        room_total = sum(
-            item.amount for item in payload.room_charges
+        # =========================
+        # CHECK PATIENT EXISTS
+        # =========================
+        patient_result = await db.execute(
+            select(Patient).where(Patient.id == payload.patient_id)
         )
 
-        treatment_total = sum(
-            item.amount for item in payload.treatment_charges
-        )
+        patient = patient_result.scalar_one_or_none()
 
-        additional_total = sum(
-            item.amount for item in payload.additional_charges
-        )
+        if not patient:
+            return {
+                "success": False,
+                "message": "Patient not found"
+            }
 
-        gross_total = (
-            room_total +
-            treatment_total +
-            additional_total
-        )
-
-        paid_total = sum(
-            item.amount for item in payload.payments
-        )
-
-        balance_total = gross_total - paid_total
-
-        # -----------------------------
-        # GENERATE BILL NUMBER
-        # -----------------------------
-
-        latest_invoice = (
-            db.query(Invoice)
-            .order_by(Invoice.id.desc())
-            .first()
-        )
-
-        next_id = 1
-
-        if latest_invoice:
-            next_id = latest_invoice.id + 1
-
-        bill_no = f"INV-2026-{str(next_id).zfill(5)}"
-
-        # -----------------------------
+        # =========================
         # CREATE MAIN INVOICE
-        # -----------------------------
-
+        # =========================
         invoice = Invoice(
             patient_id=payload.patient_id,
-
-            bill_no=bill_no,
 
             admission_date=payload.admission_date,
             discharge_date=payload.discharge_date,
@@ -73,114 +43,93 @@ def create_invoice_service(payload, db):
             room_type=payload.room_type,
             room_number=payload.room_number,
 
-            gross_total=gross_total,
-            paid_total=paid_total,
-            balance_total=balance_total
+            bill_no=payload.bill_no,
+
+            room_total=payload.room_total,
+            treatment_total=payload.treatment_total,
+            extra_total=payload.extra_total,
+
+            gross_total=payload.gross_total,
+            total_paid=payload.total_paid,
+            balance=payload.balance,
         )
 
         db.add(invoice)
 
-        # IMPORTANT
-        db.flush()
+        await db.commit()
+        await db.refresh(invoice)
 
-        # -----------------------------
+       # =========================
         # SAVE ROOM CHARGES
-        # -----------------------------
-
+        # =========================
         for room in payload.room_charges:
 
-            room_charge = InvoiceRoomCharge(
+            room_obj = InvoiceRoomCharge(
                 invoice_id=invoice.id,
-
                 room_id=room.room_id,
-
                 days=room.days,
-
                 rate=room.rate,
-
-                amount=room.amount
+                amount=room.amount,
             )
 
-            db.add(room_charge)
+            db.add(room_obj)
 
-        # -----------------------------
+
+        # =========================
         # SAVE TREATMENT CHARGES
-        # -----------------------------
-
+        # =========================
         for treatment in payload.treatment_charges:
 
-            treatment_charge = InvoiceTreatmentCharge(
+            treatment_obj = InvoiceTreatmentCharge(
                 invoice_id=invoice.id,
-
                 treatment_id=treatment.treatment_id,
-
                 qty=treatment.qty,
-
                 rate=treatment.rate,
-
-                amount=treatment.amount
+                amount=treatment.amount,
             )
 
-            db.add(treatment_charge)
+            db.add(treatment_obj)
 
-        # -----------------------------
+        # =========================
         # SAVE ADDITIONAL CHARGES
-        # -----------------------------
+        # =========================
+        for charge in payload.additional_charges:
 
-        for extra in payload.additional_charges:
-
-            additional_charge = InvoiceAdditionalCharge(
+            charge_obj = InvoiceAdditionalCharge(
                 invoice_id=invoice.id,
 
-                charge_type=extra.charge_type,
-
-                amount=extra.amount
+                charge_type=charge.type,
+                amount=charge.amount,
             )
 
-            db.add(additional_charge)
+            db.add(charge_obj)
 
-        # -----------------------------
+        # =========================
         # SAVE PAYMENTS
-        # -----------------------------
-
+        # =========================
         for payment in payload.payments:
 
-            invoice_payment = InvoicePayment(
+            payment_obj = InvoicePayment(
                 invoice_id=invoice.id,
 
                 method=payment.method,
-
-                amount=payment.amount
+                amount=payment.amount,
             )
 
-            db.add(invoice_payment)
+            db.add(payment_obj)
 
-        # -----------------------------
-        # COMMIT EVERYTHING
-        # -----------------------------
-
-        db.commit()
-
-        db.refresh(invoice)
+        await db.commit()
 
         return {
             "success": True,
-
             "message": "Invoice created successfully",
-
-            "invoice_id": invoice.id,
-
-            "bill_no": invoice.bill_no,
-
-            "gross_total": invoice.gross_total,
-
-            "paid_total": invoice.paid_total,
-
-            "balance_total": invoice.balance_total
+            "invoice_id": invoice.id
         }
 
     except Exception as e:
+        await db.rollback()
 
-        db.rollback()
-
-        raise e
+        return {
+            "success": False,
+            "detail": str(e)
+        }

@@ -1,9 +1,7 @@
-# app/models/invoice_room_charge.py
-
+# models/invoice_room_charge.py
 from sqlalchemy import Column, Integer, Float, ForeignKey
+from models.base import Base
 from sqlalchemy.orm import relationship
-from database import Base
-
 
 class InvoiceRoomCharge(Base):
     __tablename__ = "invoice_room_charges"
@@ -20,4 +18,8 @@ class InvoiceRoomCharge(Base):
 
     amount = Column(Float)
 
-    invoice = relationship("Invoice", back_populates="room_charges")
+    invoice = relationship(
+        "Invoice",
+        back_populates="room_charges"
+    )
+
