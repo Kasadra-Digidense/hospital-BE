@@ -1,8 +1,9 @@
-# models/invoice_treatment_charge.py
+# app/models/invoice_treatment_charge.py
 
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
+
 
 class InvoiceTreatmentCharge(Base):
     __tablename__ = "invoice_treatment_charges"
@@ -11,7 +12,7 @@ class InvoiceTreatmentCharge(Base):
 
     invoice_id = Column(Integer, ForeignKey("invoices.id"))
 
-    treatment = Column(String)
+    treatment_id = Column(Integer, ForeignKey("treatments.id"))
 
     qty = Column(Integer)
 

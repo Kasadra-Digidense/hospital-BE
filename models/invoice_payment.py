@@ -1,8 +1,9 @@
-# models/invoice_payment.py
+# app/models/invoice_payment.py
 
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
+
 
 class InvoicePayment(Base):
     __tablename__ = "invoice_payments"

@@ -1,8 +1,9 @@
-# models/invoice_additional_charges.py
+# app/models/invoice_additional_charge.py
 
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
+
 
 class InvoiceAdditionalCharge(Base):
     __tablename__ = "invoice_additional_charges"
