@@ -11,6 +11,9 @@ import random
 
 router = APIRouter(prefix="/patients", tags=["Patients"])
 
+################################
+## Create MRD Number Generator
+###############################
 async def generate_mrd(db: AsyncSession):
 
     result = await db.execute(
@@ -28,6 +31,34 @@ async def generate_mrd(db: AsyncSession):
 
     return str(new_mrd)
 
+################################
+## Create IP Number Generator
+###############################
+async def generate_ip_number(db: AsyncSession):
+
+    result = await db.execute(
+        select(Patient).order_by(Patient.id.desc())
+    )
+
+    last_patient = result.scalars().first()
+
+    current_year = datetime.now().year
+
+    if not last_patient or not last_patient.ip_number:
+        return f"{current_year}/1"
+
+    try:
+        last_ip = last_patient.ip_number
+
+        last_serial = int(last_ip.split("/")[-1])
+
+        new_serial = last_serial + 1
+
+        return f"{current_year}/{new_serial}"
+
+    except:
+        return f"{current_year}/1"
+    
 
 # ➤ Create Patient
 @router.post("/", response_model=PatientResponse)
@@ -35,22 +66,9 @@ async def create_patient(
     patient: PatientCreate,
     db: AsyncSession = Depends(get_session)
 ):
-
-    # check duplicate phone
-    # result = await db.execute(
-    #     select(Patient).where(Patient.phone == patient.phone)
-    # )
-
-    # existing = result.scalar_one_or_none()
-
-    # if existing:
-    #     raise HTTPException(
-    #         status_code=400,
-    #         detail="Phone already exists"
-    #     )
-        
+    generated_ip = await generate_ip_number(db)
     generated_mrd = await generate_mrd(db)
-
+    
     new_patient = Patient(
         # ── Personal ──
         name=patient.name,
@@ -76,9 +94,9 @@ async def create_patient(
 
         # ── Hospital ──
         place=patient.place,
-
+        ip_number=generated_ip,
         mrd_number=generated_mrd,
-
+      
         registration_date=patient.registrationDate,
     )
 
@@ -101,7 +119,7 @@ async def create_patient(
         "email": new_patient.email,
 
         "place": new_patient.place,
-
+        "ipNumber": new_patient.ip_number,
         "mrdNumber": new_patient.mrd_number,
 
         "registrationDate": new_patient.registration_date,
@@ -109,13 +127,10 @@ async def create_patient(
         "address": {
             "houseName": new_patient.house_name,
             "street": new_patient.street,
-
             "city": new_patient.city,
             "district": new_patient.district,
             "state": new_patient.state,
-
             "country": new_patient.country,
-
             "pincode": new_patient.pincode,
         }
     }
@@ -149,7 +164,7 @@ async def get_patients(
             "place": patient.place,
 
             "mrdNumber": patient.mrd_number,
-
+            "ipNumber": patient.ip_number,
             "registrationDate": patient.registration_date,
 
             "address": {

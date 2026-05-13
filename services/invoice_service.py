@@ -1,7 +1,7 @@
 # app/services/invoice_service.py
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, desc
 
 from models.invoice import Invoice
 from models.invoice_room_charge import InvoiceRoomCharge
@@ -12,6 +12,7 @@ from models.patient import Patient
 
 
 async def create_invoice_service(payload, db: AsyncSession):
+
     try:
 
         # =========================
@@ -30,6 +31,22 @@ async def create_invoice_service(payload, db: AsyncSession):
             }
 
         # =========================
+        # GENERATE BILL NUMBER
+        # =========================
+        last_invoice_result = await db.execute(
+            select(Invoice).order_by(desc(Invoice.id)).limit(1)
+        )
+
+        last_invoice = last_invoice_result.scalar_one_or_none()
+
+        if last_invoice:
+            next_id = last_invoice.id + 1
+        else:
+            next_id = 1
+
+        bill_no = f"INV-{next_id:05d}"
+
+        # =========================
         # CREATE MAIN INVOICE
         # =========================
         invoice = Invoice(
@@ -43,7 +60,7 @@ async def create_invoice_service(payload, db: AsyncSession):
             room_type=payload.room_type,
             room_number=payload.room_number,
 
-            bill_no=payload.bill_no,
+            bill_no=bill_no,
 
             room_total=payload.room_total,
             treatment_total=payload.treatment_total,
@@ -59,21 +76,22 @@ async def create_invoice_service(payload, db: AsyncSession):
         await db.commit()
         await db.refresh(invoice)
 
-       # =========================
+        # =========================
         # SAVE ROOM CHARGES
         # =========================
         for room in payload.room_charges:
 
             room_obj = InvoiceRoomCharge(
                 invoice_id=invoice.id,
+
                 room_id=room.room_id,
+
                 days=room.days,
                 rate=room.rate,
                 amount=room.amount,
             )
 
             db.add(room_obj)
-
 
         # =========================
         # SAVE TREATMENT CHARGES
@@ -82,7 +100,9 @@ async def create_invoice_service(payload, db: AsyncSession):
 
             treatment_obj = InvoiceTreatmentCharge(
                 invoice_id=invoice.id,
+
                 treatment_id=treatment.treatment_id,
+
                 qty=treatment.qty,
                 rate=treatment.rate,
                 amount=treatment.amount,
@@ -98,6 +118,7 @@ async def create_invoice_service(payload, db: AsyncSession):
             charge_obj = InvoiceAdditionalCharge(
                 invoice_id=invoice.id,
 
+                # charge_type=charge.charge_type,
                 charge_type=charge.type,
                 amount=charge.amount,
             )
@@ -120,13 +141,31 @@ async def create_invoice_service(payload, db: AsyncSession):
 
         await db.commit()
 
+        # =========================
+        # SUCCESS RESPONSE
+        # =========================
         return {
             "success": True,
             "message": "Invoice created successfully",
-            "invoice_id": invoice.id
+
+            "invoice": {
+                "invoice_id": invoice.id,
+
+                "bill_no": invoice.bill_no,
+
+                "patient_id": invoice.patient_id,
+
+                "admission_date": invoice.admission_date,
+                "discharge_date": invoice.discharge_date,
+
+                "gross_total": invoice.gross_total,
+                "total_paid": invoice.total_paid,
+                "balance": invoice.balance,
+            }
         }
 
     except Exception as e:
+
         await db.rollback()
 
         return {

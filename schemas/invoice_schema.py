@@ -41,7 +41,7 @@ class InvoiceCreateSchema(BaseModel):
     room_type: str
     room_number: str
 
-    bill_no: str
+    # bill_no: str
 
     room_total: float
     treatment_total: float

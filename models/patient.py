@@ -31,7 +31,6 @@ class Patient(Base):
 
     # ── Hospital Information ──
     place = Column(String, nullable=True)
-
     mrd_number = Column(String, nullable=False, unique=True)
-
+    ip_number = Column(String, nullable=True, unique=True)
     registration_date = Column(String, nullable=False)

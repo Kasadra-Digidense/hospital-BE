@@ -51,6 +51,7 @@ class PatientResponse(BaseModel):
 
     place: str
 
+    ipNumber: str | None = None
     mrdNumber: str
     registrationDate: str
 
