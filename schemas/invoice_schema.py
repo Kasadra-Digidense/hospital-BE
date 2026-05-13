@@ -38,11 +38,6 @@ class InvoiceCreateSchema(BaseModel):
 
     consultant: str
 
-    room_type: str
-    room_number: str
-
-    # bill_no: str
-
     room_total: float
     treatment_total: float
     extra_total: float
@@ -58,7 +53,6 @@ class InvoiceCreateSchema(BaseModel):
     additional_charges: List[AdditionalChargeSchema]
 
     payments: List[PaymentSchema]
-
 
 
 

@@ -57,9 +57,6 @@ async def create_invoice_service(payload, db: AsyncSession):
 
             consultant=payload.consultant,
 
-            room_type=payload.room_type,
-            room_number=payload.room_number,
-
             bill_no=bill_no,
 
             room_total=payload.room_total,
@@ -85,7 +82,6 @@ async def create_invoice_service(payload, db: AsyncSession):
                 invoice_id=invoice.id,
 
                 room_id=room.room_id,
-
                 days=room.days,
                 rate=room.rate,
                 amount=room.amount,
@@ -102,7 +98,6 @@ async def create_invoice_service(payload, db: AsyncSession):
                 invoice_id=invoice.id,
 
                 treatment_id=treatment.treatment_id,
-
                 qty=treatment.qty,
                 rate=treatment.rate,
                 amount=treatment.amount,
@@ -118,7 +113,6 @@ async def create_invoice_service(payload, db: AsyncSession):
             charge_obj = InvoiceAdditionalCharge(
                 invoice_id=invoice.id,
 
-                # charge_type=charge.charge_type,
                 charge_type=charge.type,
                 amount=charge.amount,
             )
@@ -141,22 +135,22 @@ async def create_invoice_service(payload, db: AsyncSession):
 
         await db.commit()
 
-        # =========================
-        # SUCCESS RESPONSE
-        # =========================
         return {
             "success": True,
             "message": "Invoice created successfully",
 
             "invoice": {
                 "invoice_id": invoice.id,
-
                 "bill_no": invoice.bill_no,
 
                 "patient_id": invoice.patient_id,
 
                 "admission_date": invoice.admission_date,
                 "discharge_date": invoice.discharge_date,
+
+                "room_total": invoice.room_total,
+                "treatment_total": invoice.treatment_total,
+                "extra_total": invoice.extra_total,
 
                 "gross_total": invoice.gross_total,
                 "total_paid": invoice.total_paid,

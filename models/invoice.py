@@ -23,8 +23,6 @@ class Invoice(Base):
 
     consultant = Column(String, nullable=False)
 
-    room_type = Column(String, nullable=False)
-    room_number = Column(String, nullable=False)
 
     bill_no = Column(String, nullable=False)
 
