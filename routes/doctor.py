@@ -1,6 +1,6 @@
 # routes/doctor.py
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -10,6 +10,7 @@ from models.doctor import Doctor
 
 from schemas.doctor_schema import (
     DoctorCreateSchema,
+    DoctorUpdateSchema,
     DoctorResponseSchema
 )
 
@@ -56,3 +57,64 @@ async def get_doctors(
     doctors = result.scalars().all()
 
     return doctors
+
+
+# =========================
+# UPDATE DOCTOR
+# =========================
+@router.patch("/{doctor_id}", response_model=DoctorResponseSchema)
+async def update_doctor(
+    doctor_id: int,
+    payload: DoctorUpdateSchema,
+    db: AsyncSession = Depends(get_session)
+):
+
+    result = await db.execute(
+        select(Doctor).where(Doctor.id == doctor_id)
+    )
+
+    doctor = result.scalar_one_or_none()
+
+    if not doctor:
+        raise HTTPException(
+            status_code=404,
+            detail="Doctor not found"
+        )
+
+    doctor.doctor_name = payload.doctor_name
+
+    await db.commit()
+
+    await db.refresh(doctor)
+
+    return doctor
+
+
+# =========================
+# DELETE DOCTOR
+# =========================
+@router.delete("/{doctor_id}")
+async def delete_doctor(
+    doctor_id: int,
+    db: AsyncSession = Depends(get_session)
+):
+
+    result = await db.execute(
+        select(Doctor).where(Doctor.id == doctor_id)
+    )
+
+    doctor = result.scalar_one_or_none()
+
+    if not doctor:
+        raise HTTPException(
+            status_code=404,
+            detail="Doctor not found"
+        )
+
+    await db.delete(doctor)
+
+    await db.commit()
+
+    return {
+        "message": "Doctor deleted successfully"
+    }   
