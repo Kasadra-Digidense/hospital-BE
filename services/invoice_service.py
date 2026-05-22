@@ -45,6 +45,7 @@ async def create_invoice_service(payload, db: AsyncSession):
             next_id = 1
 
         bill_no = f"{next_id:04d}"
+        
 
         # =========================
         # CREATE MAIN INVOICE
