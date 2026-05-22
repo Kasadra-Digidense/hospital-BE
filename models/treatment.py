@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Float, Boolean
 from models.base import Base
 
 
@@ -8,3 +8,5 @@ class Treatment(Base):
     id = Column(Integer, primary_key=True, index=True)
     item_name = Column(String, nullable=False, unique=True)
     price = Column(Float, nullable=False)
+
+    is_active = Column(Boolean, default=True)

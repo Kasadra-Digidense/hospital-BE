@@ -17,7 +17,7 @@ router = APIRouter(
 
 
 # -----------------------------------
-# GET ALL TREATMENTS
+# GET ALL ACTIVE TREATMENTS
 # -----------------------------------
 @router.get("/", response_model=list[TreatmentResponse])
 async def get_treatments(
@@ -25,7 +25,8 @@ async def get_treatments(
 ):
 
     result = await db.execute(
-        select(Treatment).order_by(Treatment.item_name)
+        select(Treatment)
+        .where(Treatment.is_active == True)
     )
 
     treatments = result.scalars().all()
@@ -124,9 +125,8 @@ async def update_treatment(
 
     return treatment
 
-
 # -----------------------------------
-# DELETE TREATMENT
+# SOFT DELETE TREATMENT
 # -----------------------------------
 @router.delete("/{treatment_id}")
 async def delete_treatment(
@@ -146,7 +146,9 @@ async def delete_treatment(
             detail="Treatment not found"
         )
 
-    await db.delete(treatment)
+    # Soft delete
+    treatment.is_active = False
+
     await db.commit()
 
     return {
