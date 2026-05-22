@@ -17,7 +17,7 @@ router = APIRouter(
 
 
 # -----------------------------------
-# GET ALL TREATMENTS
+# GET ALL ACTIVE TREATMENTS
 # -----------------------------------
 @router.get("/", response_model=list[TreatmentResponse])
 async def get_treatments(
@@ -25,7 +25,8 @@ async def get_treatments(
 ):
 
     result = await db.execute(
-        select(Treatment).order_by(Treatment.is_active == True)
+        select(Treatment)
+        .where(Treatment.is_active == True)
     )
 
     treatments = result.scalars().all()
