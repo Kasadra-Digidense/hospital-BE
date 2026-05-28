@@ -115,7 +115,9 @@ async def create_invoice_service(payload, db: AsyncSession):
                 invoice_id=invoice.id,
 
                 charge_type=charge.type,
-                amount=charge.amount,
+                quantity=charge.quantity,
+                unit_price=charge.unit_price,
+                total=charge.total,
             )
 
             db.add(charge_obj)

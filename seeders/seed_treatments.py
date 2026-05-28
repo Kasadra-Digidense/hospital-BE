@@ -33,37 +33,3 @@ async def seed_treatments(session):
 
     print("Treatments inserted successfully")
 
-
-
-# import asyncio
-# import pandas as pd
-
-# from database.db import AsyncSessionLocal
-# from models.treatment import Treatment
-
-
-# async def seed_data():
-
-#     # Read CSV
-#     df = pd.read_csv("treatments.csv")
-
-#     # Remove empty rows
-#     df = df.dropna(subset=["item_name", "price"])
-
-#     async with AsyncSessionLocal() as session:
-
-#         for _, row in df.iterrows():
-
-#             treatment = Treatment(
-#                 item_name=str(row["item_name"]).strip(),
-#                 price=float(row["price"])
-#             )
-
-#             session.add(treatment)
-
-#         await session.commit()
-
-#     print("Treatments inserted successfully")
-
-
-# asyncio.run(seed_data())

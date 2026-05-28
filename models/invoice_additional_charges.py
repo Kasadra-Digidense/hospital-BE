@@ -14,10 +14,12 @@ class InvoiceAdditionalCharge(Base):
 
     invoice_id = Column(Integer, ForeignKey("invoices.id"))
 
-    charge_type = Column(String)
-    amount = Column(Float)
+    charge_type = Column(String, nullable=False)
 
-    invoice = relationship(
-        "Invoice",
-        back_populates="additional_charges"
-    )
+    quantity = Column(Integer, default=1)
+
+    unit_price = Column(Float, nullable=False)
+
+    total = Column(Float, nullable=False)
+
+    invoice = relationship("Invoice", back_populates="additional_charges")
