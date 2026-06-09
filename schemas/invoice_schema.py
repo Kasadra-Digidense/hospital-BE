@@ -40,6 +40,8 @@ class InvoiceCreateSchema(BaseModel):
 
     consultant: str
 
+    advance_amount: float
+
     room_total: float
     treatment_total: float
     extra_total: float

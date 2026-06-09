@@ -60,6 +60,8 @@ async def create_invoice_service(payload, db: AsyncSession):
 
             bill_no=bill_no,
 
+            advance_amount=payload.advance_amount,
+            
             room_total=payload.room_total,
             treatment_total=payload.treatment_total,
             extra_total=payload.extra_total,

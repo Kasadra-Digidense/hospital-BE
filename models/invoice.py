@@ -30,6 +30,8 @@ class Invoice(Base):
     treatment_total = Column(Float, default=0)
     extra_total = Column(Float, default=0)
 
+    advance_amount = Column(Float, default=0)
+
     gross_total = Column(Float, default=0)
     total_paid = Column(Float, default=0)
     balance = Column(Float, default=0)
