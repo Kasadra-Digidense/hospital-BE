@@ -31,6 +31,7 @@ class Invoice(Base):
     extra_total = Column(Float, default=0)
 
     advance_amount = Column(Float, default=0)
+    discount = Column(Float, default=0)
 
     gross_total = Column(Float, default=0)
     total_paid = Column(Float, default=0)
