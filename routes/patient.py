@@ -59,8 +59,10 @@ async def generate_ip_number(db: AsyncSession):
     except:
         return f"{current_year}/1"
     
+############################################################
+# ➤ C r e a t e    P a t i e n t
+############################################################
 
-# ➤ Create Patient
 @router.post("/", response_model=PatientResponse)
 async def create_patient(
     patient: PatientCreate,
@@ -135,8 +137,9 @@ async def create_patient(
         }
     }
 
-
-# ➤ Get All Patients
+############################################################
+# ➤ G e t   A l l   P a t i e n t s
+############################################################
 @router.get("/", response_model=list[PatientResponse])
 async def get_patients(
     db: AsyncSession = Depends(get_session)
@@ -182,3 +185,141 @@ async def get_patients(
         })
 
     return response
+
+
+############################################################
+## P A T C H   A P I
+############################################################
+
+from schemas.patient import PatientUpdate
+
+
+@router.patch("/{patient_id}", response_model=PatientResponse)
+async def update_patient(
+    patient_id: int,
+    patient: PatientUpdate,
+    db: AsyncSession = Depends(get_session)
+):
+
+    result = await db.execute(
+        select(Patient).where(Patient.id == patient_id)
+    )
+
+    db_patient = result.scalar_one_or_none()
+
+    if not db_patient:
+        raise HTTPException(
+            status_code=404,
+            detail="Patient not found"
+        )
+
+    data = patient.model_dump(exclude_unset=True)
+
+    # Personal
+    if "name" in data:
+        db_patient.name = data["name"]
+
+    if "gender" in data:
+        db_patient.gender = data["gender"]
+
+    if "age" in data:
+        db_patient.age = data["age"]
+
+    if "phone" in data:
+        db_patient.phone = data["phone"]
+
+    if "altPhone" in data:
+        db_patient.alt_phone = data["altPhone"]
+
+    if "email" in data:
+        db_patient.email = data["email"]
+
+    if "place" in data:
+        db_patient.place = data["place"]
+
+    if "registrationDate" in data:
+        db_patient.registration_date = data["registrationDate"]
+
+    # Address
+    if "address" in data:
+
+        address = data["address"]
+
+        if "houseName" in address:
+            db_patient.house_name = address["houseName"]
+
+        if "street" in address:
+            db_patient.street = address["street"]
+
+        if "city" in address:
+            db_patient.city = address["city"]
+
+        if "district" in address:
+            db_patient.district = address["district"]
+
+        if "state" in address:
+            db_patient.state = address["state"]
+
+        if "country" in address:
+            db_patient.country = address["country"]
+
+        if "pincode" in address:
+            db_patient.pincode = address["pincode"]
+
+    await db.commit()
+
+    await db.refresh(db_patient)
+
+    return {
+        "id": db_patient.id,
+        "name": db_patient.name,
+        "gender": db_patient.gender,
+        "age": db_patient.age,
+        "phone": db_patient.phone,
+        "altPhone": db_patient.alt_phone,
+        "email": db_patient.email,
+        "place": db_patient.place,
+        "mrdNumber": db_patient.mrd_number,
+        "ipNumber": db_patient.ip_number,
+        "registrationDate": db_patient.registration_date,
+        "address": {
+            "houseName": db_patient.house_name,
+            "street": db_patient.street,
+            "city": db_patient.city,
+            "district": db_patient.district,
+            "state": db_patient.state,
+            "country": db_patient.country,
+            "pincode": db_patient.pincode,
+        }
+    }
+
+############################################################
+## D E L E T E     A P I
+############################################################
+
+@router.delete("/{patient_id}")
+async def delete_patient(
+    patient_id: int,
+    db: AsyncSession = Depends(get_session)
+):
+
+    result = await db.execute(
+        select(Patient).where(Patient.id == patient_id)
+    )
+
+    patient = result.scalar_one_or_none()
+
+    if not patient:
+        raise HTTPException(
+            status_code=404,
+            detail="Patient not found"
+        )
+
+    await db.delete(patient)
+
+    await db.commit()
+
+    return {
+        "success": True,
+        "message": "Patient deleted successfully"
+    }
